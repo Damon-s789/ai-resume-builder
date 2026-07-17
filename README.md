@@ -41,15 +41,6 @@ The app does not need a backend. Resume data is saved in the browser using Local
 - LocalStorage
 - GitHub Pages
 
-## Why This Project Is Interview Friendly
-
-- Shows strong React state management across a real form-based application
-- Includes practical UI features instead of only a static landing page
-- Demonstrates live preview logic and reusable rendering components
-- Uses client-side persistence with LocalStorage
-- Includes user-focused features like import/export, PDF printing, and job matching
-- Has a complete deployment flow with GitHub Pages
-
 ## Folder Structure
 
 ```text
