@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite --host 127.0.0.1 --port 5173 --strictPort",
     "build": "vite build",
+    "deploy": "powershell -ExecutionPolicy Bypass -File scripts/deploy-gh-pages.ps1",
     "lint": "oxlint",
     "preview": "vite preview --host 127.0.0.1 --port 4173 --strictPort"
   },
