@@ -39,6 +39,21 @@ function splitLinks(value = '') {
     .filter(Boolean)
 }
 
+function hasText(value = '') {
+  return String(value ?? '').trim().length > 0
+}
+
+function hasAnyText(...values) {
+  return values.some((value) => hasText(value))
+}
+
+function joinText(values, separator = ' - ') {
+  return values
+    .map((value) => String(value ?? '').trim())
+    .filter(Boolean)
+    .join(separator)
+}
+
 function improvementPlan(resume, analysis, jobMatch) {
   const suggestions = []
 
@@ -492,6 +507,17 @@ function Collection({ addItem, items, name, removeItem, title, updateItem }) {
 }
 
 function Preview({ activePanel, resume, updateSettings }) {
+  const visibleExperience = resume.experience.filter((item) =>
+    hasAnyText(item.title, item.company, item.location, item.dates, item.bullets),
+  )
+  const visibleProjects = resume.projects.filter((item) => hasAnyText(item.name, item.stack, item.link, item.bullets))
+  const visibleEducation = resume.education.filter((item) =>
+    hasAnyText(item.degree, item.school, item.location, item.dates, item.details),
+  )
+  const visibleSkills = comma(resume.skills)
+  const visibleCertifications = lines(resume.certifications)
+  const visibleAchievements = lines(resume.achievements)
+
   return (
     <motion.section
       className={`preview-col ${activePanel !== 'preview' ? 'mobile-hidden' : ''}`}
@@ -554,13 +580,31 @@ function Preview({ activePanel, resume, updateSettings }) {
             ))}
           </div>
         </header>
-        <ResumeSection title="Summary">{resume.profile.summary && <p>{resume.profile.summary}</p>}</ResumeSection>
-        <ResumeSection title="Experience">{resume.experience.map((item, index) => <Entry key={index} title={`${item.title} - ${item.company}`} meta={item.dates} sub={item.location} bullets={item.bullets} />)}</ResumeSection>
-        <ResumeSection title="Projects">{resume.projects.map((item, index) => <Entry key={index} title={item.name} meta={item.link} metaIsLink sub={item.stack} bullets={item.bullets} />)}</ResumeSection>
-        <ResumeSection title="Education">{resume.education.map((item, index) => <Entry key={index} title={item.degree} meta={item.dates} sub={`${item.school} - ${item.location}`} details={item.details} />)}</ResumeSection>
-        <ResumeSection title="Skills"><div className="skills">{comma(resume.skills).map((skill) => <span key={skill}>{skill}</span>)}</div></ResumeSection>
-        <ResumeSection title="Certifications"><List value={resume.certifications} /></ResumeSection>
-        <ResumeSection title="Achievements"><List value={resume.achievements} /></ResumeSection>
+        {hasText(resume.profile.summary) && <ResumeSection title="Summary"><p>{resume.profile.summary}</p></ResumeSection>}
+        {visibleExperience.length > 0 && (
+          <ResumeSection title="Experience">
+            {visibleExperience.map((item, index) => (
+              <Entry key={index} title={joinText([item.title, item.company])} meta={item.dates} sub={item.location} bullets={item.bullets} />
+            ))}
+          </ResumeSection>
+        )}
+        {visibleProjects.length > 0 && (
+          <ResumeSection title="Projects">
+            {visibleProjects.map((item, index) => (
+              <Entry key={index} title={item.name} meta={item.link} metaIsLink sub={item.stack} bullets={item.bullets} />
+            ))}
+          </ResumeSection>
+        )}
+        {visibleEducation.length > 0 && (
+          <ResumeSection title="Education">
+            {visibleEducation.map((item, index) => (
+              <Entry key={index} title={item.degree} meta={item.dates} sub={joinText([item.school, item.location])} details={item.details} />
+            ))}
+          </ResumeSection>
+        )}
+        {visibleSkills.length > 0 && <ResumeSection title="Skills"><div className="skills">{visibleSkills.map((skill) => <span key={skill}>{skill}</span>)}</div></ResumeSection>}
+        {visibleCertifications.length > 0 && <ResumeSection title="Certifications"><List items={visibleCertifications} /></ResumeSection>}
+        {visibleAchievements.length > 0 && <ResumeSection title="Achievements"><List items={visibleAchievements} /></ResumeSection>}
       </motion.article>
     </motion.section>
   )
@@ -709,6 +753,7 @@ function ResumeSection({ children, title }) {
 
 function PreviewLink({ value }) {
   const href = toHref(value)
+  if (!href) return null
 
   return (
     <a href={href} rel="noreferrer" target="_blank">
@@ -718,23 +763,31 @@ function PreviewLink({ value }) {
 }
 
 function Entry({ bullets, details, meta, metaIsLink, sub, title }) {
+  const bulletItems = lines(bullets)
+  if (!hasAnyText(title, meta, sub, details) && bulletItems.length === 0) return null
+
   return (
     <div className="entry">
-      <div className="entry-top">
-        <strong>{title}</strong>
-        {metaIsLink && meta ? <PreviewLink value={meta} /> : <span>{meta}</span>}
-      </div>
-      {sub && <p className="entry-sub">{sub}</p>}
-      {details && <p>{details}</p>}
-      {bullets && <List value={bullets} />}
+      {(hasText(title) || hasText(meta)) && (
+        <div className="entry-top">
+          {hasText(title) && <strong>{title}</strong>}
+          {metaIsLink && hasText(meta) ? <PreviewLink value={meta} /> : hasText(meta) && <span>{meta}</span>}
+        </div>
+      )}
+      {hasText(sub) && <p className="entry-sub">{sub}</p>}
+      {hasText(details) && <p>{details}</p>}
+      {bulletItems.length > 0 && <List items={bulletItems} />}
     </div>
   )
 }
 
-function List({ value }) {
+function List({ items, value }) {
+  const listItems = items || lines(value)
+  if (!listItems.length) return null
+
   return (
     <ul>
-      {lines(value).map((line) => (
+      {listItems.map((line) => (
         <li key={line}>{line}</li>
       ))}
     </ul>
