@@ -9,7 +9,6 @@ import {
   Palette,
   Plus,
   RotateCcw,
-  Sparkles,
   Sun,
   Trash2,
   Upload,
@@ -342,7 +341,7 @@ function Topbar({ activePanel, exportJson, importJson, reset, setActivePanel, se
     <motion.header className="topbar" initial={{ y: -18, opacity: 0 }} animate={{ y: 0, opacity: 1 }}>
       <div className="brand">
         <div className="brand-mark">
-          <Sparkles size={22} />
+          <BrandLogo />
         </div>
         <div>
           <h1>AI Resume Builder</h1>
@@ -382,6 +381,18 @@ function Topbar({ activePanel, exportJson, importJson, reset, setActivePanel, se
         </button>
       </div>
     </motion.header>
+  )
+}
+
+function BrandLogo() {
+  return (
+    <svg className="brand-logo" aria-hidden="true" viewBox="0 0 44 44">
+      <path className="logo-page" d="M13 7h14l7 7v23H13z" />
+      <path className="logo-fold" d="M27 7v8h7" />
+      <path className="logo-line" d="M18 21h12M18 26h9M18 31h6" />
+      <path className="logo-spark" d="M10 15l1.7 3.3L15 20l-3.3 1.7L10 25l-1.7-3.3L5 20l3.3-1.7z" />
+      <path className="logo-dot" d="M33 26l1 2 2 1-2 1-1 2-1-2-2-1 2-1z" />
+    </svg>
   )
 }
 
